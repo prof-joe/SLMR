@@ -1,10 +1,10 @@
-# 第４章 情報量規準
-## 4.1 情報量規準
+# Chapter 5 Information Criteria
+## 5.1 Information Criteria 
 
 RSS.min=function(X,y,T){
   m=ncol(T); S.min=Inf
   for(j in 1:m){
-    q=T[,j]; S=sum((lm(y~X[,q])$fitted.values-y)^2)/n
+    q=T[,j]; S=sum((lm(y~X[,q])$fitted.values-y)^2)
   if(S<S.min){S.min=S; set.q=q}
   }
 return(list(value=S.min,set=set.q))
@@ -45,6 +45,6 @@ plot(1:p, ylim=c(min(AIC.seq),max(BIC.seq)), type="n",xlab="# of variables", yla
 lines(AIC.seq,col="red"); lines(BIC.seq,col="blue")
 legend("topright",legend=c("AIC","BIC"), col=c("red","blue"), lwd=1, cex =.8)
 
-# 4.2 有効推定量とFisher情報量行列
-# 4.3 Kullback-Leibler情報量
-# 4.4 赤池の情報量規準(AIC)の導出
+# 4.2 Efficient Estimator and Fisher Information Matrix
+# 4.3 Kullback-Leibler divergence
+# 4.4 Derivation of Akaike's Information Criterion
