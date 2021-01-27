@@ -99,7 +99,7 @@ for(j in 1:3){
     covv[[j]]=cov(x)
 }
 g=function(v,j)f(v,mu[[j]],solve(covv[[j]]),det(covv[[j]]))
-z=array(dim=n/2)
+z=array(dim=length(test))
 for(i in test){
     u=as.matrix(df[i,1:4]); a=g(u,1);b=g(u,2); c=g(u,3)
     if(a<b){if(b<c)z[i]=3 else z[i]=2} 
