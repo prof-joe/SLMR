@@ -1,3 +1,5 @@
+### Statistical Learning with Math and R, Springer ###
+  
 # Chapter 2 Linear Regression
 ## 2.1 Least Square Method
 

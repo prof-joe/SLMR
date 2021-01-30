@@ -1,5 +1,5 @@
-# 第１章 線形回帰
-## 1.1 最小２乗法
+# Chapter 2 Linear Regression
+## 1.1 Least Square Method
 
 min.sq=function(x,y){ # 最小二乗法の切片と傾きを求める関数 min.sq
   x.bar=mean(x); y.bar=mean(y)
@@ -14,7 +14,7 @@ x=x-mean(x); y=y-mean(y) # 中心化
 abline(min.sq(x,y)$a,min.sq(x,y)$b,col="blue") # 中心化後の直線
 legend("topleft",c("中心化前","中心化後"),lty=1, col=c("red","blue")) # 凡例
 
-## 1.2 重回帰
+## 1.2 Multiple Regression
 
 n=100; p=2; beta=c(1,2,3)
 x=matrix(rnorm(n*p),nrow=n,ncol=p)
