@@ -1,0 +1,198 @@
+### Statistical Learning with Math and R, Springer ###
+
+# Chapter 10 Unsupervised Learning
+
+## 10.1 K-means Clustering
+
+k.means=function(X,K, iteration=20){
+  n=nrow(X); p=ncol(X); center=array(dim=c(K,p));
+  y=sample(1:K, n, replace=TRUE);
+  scores=NULL　　　　　　　　　　　　　#
+  for(h in 1:iteration){
+    for(k in 1:K){
+      if(sum(y[]==k)==0)center[k,]=Inf ## sum(y[]==k)でy[i]=kなるiの個数を意味する。サンプルを含まないクラスタは消滅
+      else for(j in 1:p)center[k,j]= mean(X[y[]==k,j])
+    }
+    S.total=0 #
+    for(i in 1:n){
+      S.min=Inf;
+      for(k in 1:K){
+        S=sum((X[i,]-center[k,])^2);
+        if(S<S.min){S.min=S; y[i]=k}
+      }
+    S.total=S.total+S.min #
+    }
+    scores=c(scores,S.total) #
+  }
+  return(list(clusters=y,scores=scores))
+}
+p=2; n=1000; X=matrix(rnorm(p*n),nrow=n,ncol=p) ## Data Generation
+y=k.means(X,5)$clusters ## Obtain the cluster for each sample
+# Change the color for each cluster
+plot(-3:3, -3:3, xlab="First Component", ylab="Second Component", type="n")
+points(X[,1],X[,2],col=y+1)
+
+p=2; n=1000; X=matrix(rnorm(p*n),nrow=n,ncol=p) ## Data Generation
+input=1:20; output=k.means(X,5)$scores
+plot(input, log(output), ylim=c(6.2,7.5), xlab="The Number of Repetition", ylab="log(Score)",
+    type="l",col=1, main="The score is decreasing differently for each initial value")
+for(r in 2:10){output=k.means(X,5)$scores; lines(input,log(output),col=r)}
+
+## 10.2 Hierarchial Clustering
+ 
+dist.complete=function(x,y){
+  x=as.matrix(x); y=as.matrix(y); r=nrow(x); s=nrow(y)
+  dist.max=0
+  for(i in 1:r)for(j in 1:s){d=norm(x[i,]-y[j,],"2"); if(d>dist.max)dist.max=d}
+  return(dist.max)
+}
+dist.single=function(x,y){
+  x=as.matrix(x); y=as.matrix(y); r=nrow(x); s=nrow(y)
+  dist.min=Inf
+  for(i in 1:r)for(j in 1:s){d=norm(x[i,]-y[j,],"2"); if(d<dist.min)dist.min=d}
+  return(dist.min)
+}
+dist.centroid=function(x,y){
+  x=as.matrix(x); y=as.matrix(y); r=nrow(x); s=nrow(y)
+  x.bar=0; for(i in 1:r)x.bar=x.bar+x[i,]; x.bar=x.bar/r
+  y.bar=0; for(i in 1:s)y.bar=y.bar+y[i,]; y.bar=y.bar/s
+  return(norm(x.bar-y.bar,"2")^2)
+}
+dist.average=function(x,y){
+  x=as.matrix(x); y=as.matrix(y); r=nrow(x); s=nrow(y)
+  S=0; for(i in 1:r)for(j in 1:s){d=norm(x[i,]-y[j,],"2"); S=S+d}
+  return(S/r/s)
+}
+hc=function(X,dd="complete"){
+  n=nrow(X); index=list(); for(i in 1:n) index[[i]]=list(i)
+  cluster=list()
+  for(k in n:2){
+    dist.min=Inf
+    for(i in 1:(k-1))for(j in (i+1):k){
+      i.0=unlist(index[[i]]); j.0=unlist(index[[j]])
+      d=switch(dd,"complete"=dist.complete(X[i.0,], X[j.0,]),
+            "single"=dist.single(X[i.0,], X[j.0,]),
+            "centroid"=dist.centroid(X[i.0,], X[j.0,]),
+            "average"=dist.average(X[i.0,], X[j.0,]))
+      if(d<dist.min){dist.min=d; i.1=i; j.1=j}
+    }
+    index[[i.1]]= append(index[[i.1]],index[[j.1]])
+    if(j.1<k)for(h in (j.1+1):k)index[[h-1]]= index[[h]]; index[[k]]=NULL
+    cluster[[k-1]]=index
+  }
+  return(cluster)
+}
+n=200; p=2; X=matrix(rnorm(n*p),ncol=p,nrow=n) ## Data Generation
+cluster=hc(X); par(mfrow=c(2,2))
+for(K in c(3,5,7,9)){
+  grp=cluster[[K]]
+  plot(-3:3,-3:3,xlab="First Component",ylab="Second Component",type="n", main=paste("K=",K))
+  for(k in 1:K){ 
+    z=unlist(grp[[k]]); x=X[z,1]; y=X[z,2]; points(x,y,col=k+1) 
+  }
+}
+
+n=100; p=2; K=7; X=matrix(rnorm(n*p),ncol=p,nrow=n) ## Data Generation
+for(d in c("complete","single","centroid","average")){
+  cluster=hc(X, dd=d); grp=cluster[[K]]
+  plot(-3:3,-3:3,xlab="First Component",ylab="Second Component",type="n", main=d)
+  for(k in 1:K){ z=unlist(grp[[k]]); x=X[z,1]; y=X[z,2]; points(x,y,col=k+1) }
+}
+par(mfrow=c(1,1))
+
+x=matrix(rnorm(n*2),ncol=2); par(mfrow=c(2,2))
+hc.complete=hclust(dist(x),method="complete");plot(hc.complete)
+hc.single=hclust(dist(x),method="single");plot(hc.single)
+hc.centroid=hclust(dist(x),method="centroid");plot(hc.centroid)
+hc.average=hclust(dist(x),method="average");plot(hc.average)
+
+## The program in Appendix
+hc.dendroidgram=function(cluster, dd="complete"){
+  index=unlist(cluster[[1]]); y=unlist(index); z=matrix(0,ncol=5,nrow=n)
+  for(i in 1:n)index[[i]]=list(y[i]); #for(i in 1:n)height[i]=0
+  height=rep(0,n)
+  for(k in n:2){
+    dist.min=Inf
+    for(i in 1:(k-1)){
+      i.0=unlist(index[[i]]); j.0=unlist(index[[i+1]])
+      d=switch(dd,
+              "complete"=dist.complete(X[i.0,], X[j.0,]),
+               "single"=dist.single(X[i.0,], X[j.0,]),
+               "centroid"=dist.centroid(X[i.0,], X[j.0,]),
+              "average"=dist.average(X[i.0,], X[j.0,]))
+      if(d<dist.min){dist.min=d; i.1=i; j.1=i+1}
+    }
+    i=0; for(h in 1:i.1)i=i+length(index[[h]]);
+    j=i+length(index[[j.1]])
+    z[k,1]=i-length(index[[i.1]])/2+0.5;
+    z[k,2]=j-length(index[[j.1]])/2+0.5
+    z[k,3]=height[i.1]; z[k,4]=height[j.1]; z[k,5]=dist.min
+    index[[i.1]]= append(index[[i.1]],index[[j.1]])
+    if(j.1<k)for(h in (j.1+1):k){
+        index[[h-1]]= index[[h]]; height[h-1]=height[h]
+    }
+    index[[k]]=NULL; height[i.1]=dist.min
+  }
+  plot(1:n,1:n,ylim=c(0,100),xlab="",ylab="",type="n",xaxt="n",
+      yaxt="n",bty ="n", main=dd)
+  r=z[2,5]/100; for(k in n:2)z[k,3:5]=z[k,3:5]/r
+  for(k in n:2){
+    segments(z[k,1],z[k,3],z[k,1],z[k,5])
+    segments(z[k,1],z[k,5],z[k,2],z[k,5])
+    segments(z[k,2],z[k,5],z[k,2],z[k,4])
+  }
+  for(i in 1:n)text(i,0,y[i])
+}
+n=30; p=3; X=matrix(rnorm(n*p),ncol=p,nrow=n) ## Data Generation
+par(mfrow=c(2,2))
+for(d in c("complete","single","centroid","average")){
+  cluster=hc(X, dd=d);   
+  hc.dendroidgram(cluster,dd=d)
+}
+
+10.3 Principle Component Analysis
+
+pca=function(x){
+  n=nrow(x); p=ncol(x); center=array(dim=p)
+  for(j in 1:p)center[j]=mean(x[,j]); for(j in 1:p)x[,j]=x[,j]-center[j]
+  sigma = t(x)%*%x; lambda =eigen(sigma)$values
+  phi = eigen(sigma)$vectors
+  return(list(lambdas=lambda,vectors=phi,centers=center))
+}
+n=100; p=5; x=matrix(rnorm(n*p), ncol=p, nrow=n)
+pca(x)$lambdas; pca(x)$vectors; pca(x)$centers
+prcomp(x)$rotation; 
+(prcomp(x)$sdev)^2; 
+prcomp(x)$center
+names(prcomp(x))
+pr.var=(prcomp(x)$sdev)^2
+pve=pr.var/sum(pr.var)
+par(mfrow=c(1,2))
+plot(pve, xlab="Components", ylab="Proportions", ylim=c(0,1) ,type="b")
+plot(cumsum(pve), xlab="Components", ylab="Accumulated Proportions", ylim=c(0,1), type="b")
+n=100; a=0.7; b=sqrt(1-a^2); u=rnorm(n); v=rnorm(n); x=u; y=u*a+v*b;plot(x,y)
+plot(x,y, xlim=c(-4, 4), ylim=c(-4, 4))
+T=prcomp(cbind(x,y))$rotation; T[2,1]/T[1,1]*T[2,2]/T[1,2]
+abline(0,T[2,1]/T[1,1],col="red"); abline(0, T[2,2]/T[1,2],col="blue")
+pr.out=prcomp(USArrests, scale=TRUE)
+biplot(pr.out)
+pr.out$x=-pr.out$x; pr.out$rotation=-pr.out$rotation; biplot(pr.out)
+
+
+library(MASS)
+z=as.matrix(Boston); y=k.means(z,5)$clusters; w=prcomp(z)$x[,1:2]
+plot(w,col=y+1, xlab="第1主成分", ylab="第2主成分",main="Bostonデータのクラスタリング")
+
+pca.regression=function(X,y,m){
+  pr=prcomp(X); Z=pr$x[,1:m]; phi=pr$rotation[,1:m]
+  theta= solve(t(Z)%*%Z)%*%t(Z)%*%y; beta=phi%*%theta
+  return(list(theta=theta,beta=beta))
+}
+## データ生成
+n=100; p=5; X=matrix(rnorm(n*p),nrow=n,ncol=p);
+for(j in 1:p)X[,j]=X[,j]-mean(X[,j])
+y=X[,1]+X[,2]+X[,3]+X[,4]+X[,5]+rnorm(n); y=y-mean(y)
+## 実行
+pca.regression(X,y,3)
+pca.regression(X,y,5)$beta; 
+solve(t(X)%*%X)%*%t(X)%*%y

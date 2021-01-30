@@ -195,7 +195,7 @@ mu.0=-1
 var.1=1
 var.0=1
 x=rnorm(N.0,mu.0,var.0)
-y=rnorm(N.1,mu.1,var.1) # x: healthy?¼Œy: sick
+y=rnorm(N.1,mu.1,var.1) # x: healthyï¼Œy: sick
 plot(1:1,1:1,xlim=c(0,1),ylim=c(0,1), xlab="False Positive", ylab="True Positive",
 main="ROC curve", type="n")
 theta.seq=exp(seq(-10,100,0.1))
