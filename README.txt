@@ -7,4 +7,3 @@ https://bayesnet.org/books/
 Thank you.
 
 Joe Suzuki.
-

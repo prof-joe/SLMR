@@ -87,7 +87,6 @@ for(h in 1:r)if(vertex[[h]]$j!=0){
 }
 cbind(VAR,TH)
 VAR
-
 value=function(u,vertex){
   r=1
   while(vertex[[r]]$j!=0)if(u[vertex[[r]]$j]<vertex[[r]]$th)
@@ -163,7 +162,6 @@ V(g)$color=col
 V(g)$name=""
 plot(g, pin=c(4,4), layout = layout.reingold.tilford(g, root=1)); title("誤り率")
 ## For Gini and entropy, we executed similarly by replacing mis.match by gini and entropy.
-
 df=iris; n=nrow(df)
 p=ncol(df)
 index=sample(1:n,n,replace=FALSE)
@@ -343,7 +341,6 @@ for(b in 2:B)for(i in test)z[b,i]=z[b-1,i]+lambda*value(x[i,],trees[[b]])
 out=NULL
 for(b in 1:B)out=c(out,sum((y[test]-z[b,test])^2)/length(test))
 out1=out
-
 # Executed even for d=2,d=3
 d=2;trees=list(); r=y[train]
 for(b in 1:B){
@@ -356,7 +353,6 @@ for(b in 2:B)for(i in test)z[b,i]=z[b-1,i]+lambda*value(x[i,],trees[[b]])
 out=NULL; 
 for(b in 1:B)out=c(out,sum((y[test]-z[b,test])^2)/length(test))
 out2=out
-
 # d=3
 d=3;trees=list(); r=y[train]
 for(b in 1:B){
