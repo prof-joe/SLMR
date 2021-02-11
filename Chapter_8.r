@@ -111,7 +111,7 @@ for(alpha in alpha.seq){
   out=c(out,SS/100)
 }
 plot(alpha.seq,out,type="l",ylim=c(10.5,12), xlab="alpha",
-     ylab="二乗誤差", main="CVで最適なalpha (Bostonデータセット, N=100)")
+     ylab="SQ Error", main="Optimum alpha via CV (Boston dataset, N=100)")
 
 ## 8.2 Decision Trees for Classification
 mode=function(y)names(sort(table(y),decreasing=TRUE))[1] ## Most Frequent value
@@ -124,7 +124,7 @@ gini=function(y){
   if(n==0)return(0)
   z=as.vector(table(y))
   m=length(z);
-  T=0;for(j in 1:m)T=T+z[j]*(n-z[j])/n
+  T=0;for(j in 1:m)T=T+z[j]*(n-z[j])
   return(T/n)
 }
 ## Entropy
@@ -197,7 +197,7 @@ for(h in 1:8){
   g=graph_from_edgelist(edge.list)
   V(g)$color=col
   V(g)$name=""
-  plot(g, layout = layout.reingold.tilford(g, root=1))
+  plot(g, layout = layout.reingold.tilford(g, root=1),edge.arrow.size=0.1)
 }
 par(mfrow=c(1,1))
 
@@ -364,3 +364,20 @@ lines(21:100, out2[21:100],col="blue")
 lines(21:100, out3[21:100],col="green")
 legend("topright",legend=c("d=1","d=2","d=3"),col=c("red","blue","green"),lty=1)
 
+library(MASS); library(gbm)
+train=1:200; test= 201:300; boston.test=Boston[test,14]
+MAX=5000; nn=c(seq(1,9,1),seq(10,90,10),seq(100,MAX,50))
+plot(nn,nn/MAX*80, type="n", xlab="# of Generated Trees", ylab="SQ Error for TEST")
+d=1:3; color=c("blue","green","red")
+for(i in 1:3){
+x=NULL; y=NULL
+for(n in nn){
+boost.boston=gbm(medv~., data=Boston[train,], distribution="gaussian",
+n.trees=n, interaction.depth= i, shrinkage=0.001)
+yhat.boost=predict(boost.boston, n.trees=n, newdata= Boston[test,])
+S=mean((yhat.boost-boston.test)^2)
+x=c(x,n); y=c(y,S)
+}
+lines(x,y, col=color[i])
+}
+legend("topright",legend=c("d=1","d=2","d=3"), col=color, lwd=2, cex =.8)
