@@ -10,7 +10,7 @@ k.means=function(X,K, iteration=20){
   scores=NULL　　　　　　　　　　　　　#
   for(h in 1:iteration){
     for(k in 1:K){
-      if(sum(y[]==k)==0)center[k,]=Inf ## sum(y[]==k)でy[i]=kなるiの個数を意味する。サンプルを含まないクラスタは消滅
+      if(sum(y[]==k)==0)center[k,]=Inf ## sum(y[]==k) means # of samples s.t. y[i]=k
       else for(j in 1:p)center[k,j]= mean(X[y[]==k,j])
     }
     S.total=0 #
@@ -100,6 +100,7 @@ for(d in c("complete","single","centroid","average")){
 }
 par(mfrow=c(1,1))
 
+n=100
 x=matrix(rnorm(n*2),ncol=2); par(mfrow=c(2,2))
 hc.complete=hclust(dist(x),method="complete");plot(hc.complete)
 hc.single=hclust(dist(x),method="single");plot(hc.single)
@@ -155,7 +156,7 @@ for(d in c("complete","single","centroid","average")){
 pca=function(x){
   n=nrow(x); p=ncol(x); center=array(dim=p)
   for(j in 1:p)center[j]=mean(x[,j]); for(j in 1:p)x[,j]=x[,j]-center[j]
-  sigma = t(x)%*%x; lambda =eigen(sigma)$values
+  sigma = t(x)%*%x/n; lambda =eigen(sigma)$values
   phi = eigen(sigma)$vectors
   return(list(lambdas=lambda,vectors=phi,centers=center))
 }
@@ -181,18 +182,18 @@ pr.out$x=-pr.out$x; pr.out$rotation=-pr.out$rotation; biplot(pr.out)
 
 library(MASS)
 z=as.matrix(Boston); y=k.means(z,5)$clusters; w=prcomp(z)$x[,1:2]
-plot(w,col=y+1, xlab="第1主成分", ylab="第2主成分",main="Bostonデータのクラスタリング")
+plot(w,col=y+1, xlab="First", ylab="Second",main="Boston data clustering")
 
 pca.regression=function(X,y,m){
   pr=prcomp(X); Z=pr$x[,1:m]; phi=pr$rotation[,1:m]
   theta= solve(t(Z)%*%Z)%*%t(Z)%*%y; beta=phi%*%theta
   return(list(theta=theta,beta=beta))
 }
-## データ生成
+## Data Generation
 n=100; p=5; X=matrix(rnorm(n*p),nrow=n,ncol=p);
 for(j in 1:p)X[,j]=X[,j]-mean(X[,j])
 y=X[,1]+X[,2]+X[,3]+X[,4]+X[,5]+rnorm(n); y=y-mean(y)
-## 実行
+## Execution
 pca.regression(X,y,3)
 pca.regression(X,y,5)$beta; 
 solve(t(X)%*%X)%*%t(X)%*%y
